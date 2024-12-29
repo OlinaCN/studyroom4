@@ -1,7 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.util.List" %>
-<%@ page import="studyroom.bean.Message" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +10,7 @@
     <title>预约自习室</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* 添加新的样式 */
+        /* 保留原有样式 */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -37,7 +36,6 @@
             background-color: #138496;
         }
 
-        /* 调整公告预览区域样式 */
         #announcements {
             margin-bottom: 20px;
             padding: 15px;
@@ -55,66 +53,129 @@
             padding: 8px;
             border-bottom: 1px solid #ddd;
         }
+
+        /* 留言板样式优化 */
+        .message-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .message-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #17a2b8;
+        }
+
+        .message-form {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .message-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 14px;
+        }
+
+        .message-form button {
+            background-color: #17a2b8;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .message-form button:hover {
+            background-color: #138496;
+        }
+
+        .message-list {
+            margin-top: 25px;
+        }
+
+        .message-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .message-author {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .message-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .message-content {
+            margin: 15px 0;
+            line-height: 1.6;
+            color: #444;
+        }
+
+        .message-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .edit-btn {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>用户功能界面 - 我的留言</h2>
-
-    <!-- 新增留言 -->
-    <form action="<%= request.getContextPath() %>/MessageServlet" method="post">
-        <input type="hidden" name="action" value="add">
-        <textarea name="content" rows="3" cols="40" placeholder="请输入留言"></textarea>
-        <br/>
-        <input type="submit" value="发布留言">
-    </form>
-
-    <!-- 显示用户已有留言 -->
-    <table border="1" cellspacing="0" cellpadding="5">
-        <tr>
-            <th>留言ID</th>
-            <th>内容</th>
-            <th>时间</th>
-            <th>操作</th>
-        </tr>
-        <%
-            List<studyroom.bean.Message> messageList =
-                    (List<studyroom.bean.Message>)request.getAttribute("messageList");
-            if (messageList != null) {
-                for (studyroom.bean.Message msg : messageList) {
-        %>
-        <tr>
-            <td><%= msg.getId() %></td>
-            <td><%= msg.getContent() %></td>
-            <td><%= msg.getCreateTime() %></td>
-            <td>
-                <!-- 修改留言 -->
-                <form action="<%= request.getContextPath() %>/MessageServlet" method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" value="<%= msg.getId() %>">
-                    <input type="text" name="content" value="<%= msg.getContent() %>">
-                    <input type="submit" value="修改">
-                </form>
-
-                <!-- 删除留言 -->
-                <form action="<%= request.getContextPath() %>/MessageServlet" method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" value="<%= msg.getId() %>">
-                    <input type="submit" value="删除">
-                </form>
-            </td>
-        </tr>
-        <%
-                }
-            }
-        %>
-    </table>
-
-    <!-- 跳转到公告或其他功能的按钮，示例： -->
-    <p><a href="<%= request.getContextPath() %>/announcement.jsp">查看公告</a></p>
-    <p><a href="<%= request.getContextPath() %>/logout.jsp">退出登录</a></p>
     <h1>预约自习室</h1>
+    <!-- 保留原有的预约表单 -->
     <form action="function/deal" method="post" class="reserve-form">
         <div class="form-group">
             <label for="userName">用户名称：</label>
@@ -134,19 +195,56 @@
         <div class="action-buttons">
             <button type="submit" class="btn btn-submit">提交预约</button>
             <a href="function/order" class="btn btn-history">查看正在进行的订单</a>
-            <!-- 添加查看公告按钮 -->
             <a href="user/announcements" class="btn btn-view-announcements">查看所有公告</a>
             <a href="user/exit" class="btn btn-back">退出登录</a>
         </div>
     </form>
+
+    <!-- 优化后的留言板部分 -->
+    <div class="message-section">
+        <h3>留言板</h3>
+        <div class="message-form">
+            <form action="${pageContext.request.contextPath}/user/messages" method="post">
+                <input type="hidden" name="action" value="add">
+                <textarea name="content" placeholder="写下你的想法..." required></textarea>
+                <button type="submit">发布留言</button>
+            </form>
+        </div>
+
+        <div class="message-list">
+            <c:forEach var="message" items="${messages}">
+                <div class="message-item">
+                    <div class="message-header">
+                        <span class="message-author">${message.username}</span>
+                        <span class="message-time">
+                            <fmt:formatDate value="${message.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                        </span>
+                    </div>
+                    <div class="message-content">${message.content}</div>
+                    <c:if test="${user.id == message.userId}">
+                        <div class="message-actions">
+                            <a href="${pageContext.request.contextPath}/edit-message?id=${message.id}"
+                               class="edit-btn">编辑</a>
+                            <form action="${pageContext.request.contextPath}/user/messages"
+                                  method="post" style="display: inline;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="id" value="${message.id}">
+                                <button type="submit" class="delete-btn"
+                                        onclick="return confirm('确定要删除这条留言吗？')">删除</button>
+                            </form>
+                        </div>
+                    </c:if>
+                </div>
+            </c:forEach>
+        </div>
+    </div>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const flag = ${flag};
-
         if (!flag) {
             alert("余额不足，请充值后再预约！");
-
             const submitButton = document.querySelector('.btn-submit');
             if (submitButton) {
                 submitButton.disabled = true;

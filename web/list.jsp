@@ -1,6 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ page import="java.util.List, studyroom.bean.Message" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +11,7 @@
     <style>
         body {
             display: flex;
-            flex-direction: column; /* 主体采用纵向布局 */
+            flex-direction: column;
             min-height: 100vh;
             margin: 0;
             font-family: Arial, sans-serif;
@@ -40,13 +40,13 @@
         .navbar p {
             margin: 0;
             font-size: 1em;
-            flex-grow: 1; /* 使文字在导航栏中间 */
-            text-align: center; /* 使文字居中 */
+            flex-grow: 1;
+            text-align: center;
         }
 
         .main-content {
             display: flex;
-            margin-top: 60px; /* 给主内容区留出导航栏的高度 */
+            margin-top: 60px;
         }
 
         .sidebar {
@@ -57,10 +57,11 @@
             flex-direction: column;
             padding: 20px;
             position: fixed;
-            top: 60px; /* 将侧边栏向下偏移，避开导航栏 */
+            top: 60px;
             left: 0;
-            height: calc(100vh - 60px); /* 确保侧边栏在导航栏下面显示 */
+            height: calc(100vh - 60px);
             z-index: 1;
+            overflow-y: auto;
         }
 
         .sidebar a,
@@ -75,9 +76,9 @@
             align-items: center;
             width: 100%;
             text-align: center;
-            background-color: transparent; /* 默认透明 */
+            background-color: transparent;
             color: white;
-            border: none; /* 无边框 */
+            border: none;
         }
 
         .sidebar a:hover,
@@ -86,31 +87,47 @@
         }
 
         .sidebar form button {
-            background: none; /* 移除按钮默认样式 */
+            background: none;
             border: none;
-            color: inherit; /* 使用父元素的文字颜色 */
-            font: inherit; /* 使用父元素的字体 */
+            color: inherit;
+            font: inherit;
             cursor: pointer;
-            width: 100%; /* 与父元素一致 */
-            height: 100%; /* 与父元素一致 */
+            width: 100%;
+            height: 100%;
             text-align: center;
         }
 
         .content {
             flex-grow: 1;
             padding: 20px;
-            margin-left: 250px; /* 给内容区域留出侧边栏的宽度 */
+            margin-left: 250px;
+        }
+
+        /* 公告部分样式 */
+        #announcements {
+            margin-bottom: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        #announcements h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
         }
 
         .announcement-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
         }
 
         .announcement-content {
             flex-grow: 1;
+            margin-right: 20px;
         }
 
         .announcement-actions {
@@ -118,96 +135,99 @@
             gap: 10px;
         }
 
-        .announcement-actions form, .announcement-actions a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 40px;
-            margin: 0;
-            padding: 0;
+        .announcement-actions a,
+        .announcement-actions button {
+            padding: 8px 15px;
             border-radius: 4px;
-            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: opacity 0.3s;
         }
 
         .announcement-actions a {
-            background-color: lightblue;
-            border: 2px solid blue;
-            color: blue;
+            background-color: #3498db;
+            color: white;
         }
 
-        .announcement-actions form button {
-            background-color: lightgreen;
-            border: 2px solid green;
-            color: green;
-            cursor: pointer;
+        .announcement-actions button {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        /* 留言管理部分样式 */
+        .admin-message-section {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .admin-message-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .admin-table {
             width: 100%;
-            height: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
         }
 
-        .announcement-actions form button:hover, .announcement-actions a:hover {
-            opacity: 0.8;
+        .admin-table th,
+        .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .admin-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .admin-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .admin-table .edit-btn,
+        .admin-table .delete-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            margin-right: 5px;
+        }
+
+        .admin-table .edit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .admin-table .delete-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .admin-table .actions {
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
 <div class="navbar">
     <h1>管理员界面</h1>
-    <p>欢迎管理员! 在这你可以管理用户、自习室还有订单</p>
+    <p>欢迎管理员! 在这你可以管理用户、自习室、公告和留言</p>
 </div>
 
 <div class="main-content">
-    <h2>管理员界面 - 留言管理</h2>
-
-    <!-- 留言一览表 -->
-    <table border="1" cellspacing="0" cellpadding="5">
-        <tr>
-            <th>编号</th>
-            <th>用户ID</th>
-            <th>内容</th>
-            <th>时间</th>
-            <th>操作</th>
-        </tr>
-        <%
-            List<studyroom.bean.Message> messageList =
-                    (List<studyroom.bean.Message>) request.getAttribute("messageList");
-            if (messageList != null) {
-                for (studyroom.bean.Message msg : messageList) {
-        %>
-        <tr>
-            <td><%= msg.getId() %></td>
-            <td><%= msg.getUserId() %></td>
-            <td><%= msg.getContent() %></td>
-            <td><%= msg.getCreateTime() %></td>
-            <td>
-                <!-- 编辑留言 -->
-                <form action="<%= request.getContextPath() %>/MessageServlet" method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="update">
-                    <input type="hidden" name="id" value="<%= msg.getId() %>">
-                    <input type="text" name="content" value="<%= msg.getContent() %>">
-                    <input type="submit" value="修改">
-                </form>
-
-                <!-- 删除留言 -->
-                <form action="<%= request.getContextPath() %>/MessageServlet" method="post" style="display:inline;">
-                    <input type="hidden" name="action" value="delete">
-                    <input type="hidden" name="id" value="<%= msg.getId() %>">
-                    <input type="submit" value="删除">
-                </form>
-            </td>
-        </tr>
-        <%
-                }
-            }
-        %>
-    </table>
-
-    <!-- 跳转到公告功能或其他功能的按钮，示例： -->
-    <p><a href="<%= request.getContextPath() %>/listAnnouncement.jsp">查看公告</a></p>
-    <p><a href="<%= request.getContextPath() %>/someOtherPage.jsp">其他功能</a></p>
     <div class="sidebar">
         <a href="addAnnouncement.jsp" class="btn-add">发布公告</a>
-        <!-- 使用 form 保留功能，样式与 a 保持一致 -->
         <form action="announcements" method="post">
             <button type="submit">管理公告</button>
         </form>
@@ -219,22 +239,68 @@
     </div>
 
     <div class="content">
+        <!-- 公告管理部分 -->
         <div id="announcements">
+            <h2>公告管理</h2>
             <ul>
                 <c:forEach var="announcement" items="${announcements}">
                     <li class="announcement-item">
-                        <div class="announcement-content">${announcement.title}: ${announcement.content}</div>
+                        <div class="announcement-content">
+                            <strong>${announcement.title}</strong>: ${announcement.content}
+                            <div class="announcement-time">
+                                <fmt:formatDate value="${announcement.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/>
+                            </div>
+                        </div>
                         <div class="announcement-actions">
                             <a href="editAnnouncement.jsp?id=${announcement.id}">编辑</a>
                             <form action="announcements" method="post" style="display:inline;">
                                 <input type="hidden" name="id" value="${announcement.id}">
                                 <input type="hidden" name="action" value="delete">
-                                <button type="submit">删除</button>
+                                <button type="submit" onclick="return confirm('确定要删除这条公告吗？')">删除</button>
                             </form>
                         </div>
                     </li>
                 </c:forEach>
             </ul>
+        </div>
+
+        <!-- 留言管理部分 -->
+        <div class="admin-message-section">
+            <h2>留言管理</h2>
+            <div class="message-list">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>作者</th>
+                        <th>内容</th>
+                        <th>发布时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <c:forEach var="message" items="${messages}">
+                        <tr>
+                            <td>${message.id}</td>
+                            <td>${message.username}</td>
+                            <td>${message.content}</td>
+                            <td><fmt:formatDate value="${message.createdAt}" pattern="yyyy-MM-dd HH:mm:ss"/></td>
+                            <td class="actions">
+                                <a href="${pageContext.request.contextPath}/edit-message?id=${message.id}"
+                                   class="edit-btn">编辑</a>
+                                <form action="${pageContext.request.contextPath}/admin/messages"
+                                      method="post" style="display: inline;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="${message.id}">
+                                    <button type="submit" class="delete-btn"
+                                            onclick="return confirm('确定要删除这条留言吗？')">删除</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
